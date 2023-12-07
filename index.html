@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @font-face {
+            font-family: "FX_LED";
+            src: url("fonts/FX-LED.TTF");
+        }
+
+        @font-face {
+            font-family: "Hack";
+            src: url("fonts/Hack-Bold.ttf");
+        }
+
+        .digital-clock {
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            border-radius: 2rem;
+            user-select: none;
+            padding: 0.2rem;
+            border: 0.5rem solid #2d2d2d;
+        }
+
+        .week {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 3rem;
+            color: #2d2d2d;
+            font-weight: bold;
+            font-family: "Hack";
+        }
+
+        .week .active {
+            color: white;
+        }
+
+        .time {
+            font-family: "FX_LED";
+        }
+
+        .hour,
+        .min,
+        .dot {
+            display: inline-block;
+            font-size: 13rem;
+        }
+
+        .min {
+            display: math;
+        }
+
+        .invisible {
+            visibility: hidden;
+        }
+        .alarm-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #setAlarmButton {
+            padding: 7px 10px;
+            font-size: 1.5rem;
+        }
+
+        #audioPlayer {
+            display: none;
+        }
+    </style>
+     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const $ = (selector) => document.querySelector(selector);
+
+            const hour = $('.hour');
+            const min = $('.min');
+            const dot = $('.dot');
+            const week = $('.week');
+            const alarmInput = $('#alarmInput');
+            const setAlarmButton = $('#setAlarmButton');
+            const audioPlayer = $('#audioPlayer');
+            let showDot = true;
+            let alarmTime;
+
+            function update() {
+                showDot = !showDot;
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes();
+
+                if (showDot) {
+                    dot.classList.add('invisible');
+                } else {
+                    dot.classList.remove('invisible');
+                }
+
+                hour.textContent = String(hours).padStart(2, '0');
+                min.textContent = String(minutes).padStart(2, '0');
+
+                Array.from(week.children).forEach((element) => {
+                    element.classList.remove('active');
+                });
+
+                week.children[now.getDay()].classList.add('active');
+
+                // Vérifier l'alarme
+                if (alarmTime && hours === alarmTime.getHours() && minutes === alarmTime.getMinutes()) {
+                    // Réinitialiser l'alarme après qu'elle a été déclenchée
+                    alarmTime = undefined;
+                    // Jouer la musique
+                    audioPlayer.play();
+                }
+            }
+
+            setAlarmButton.addEventListener('click', function() {
+                const alarmValue = alarmInput.value;
+                if (alarmValue) {
+                    const [hours, minutes] = alarmValue.split(':');
+                    alarmTime = new Date();
+                    alarmTime.setHours(parseInt(hours, 10));
+                    alarmTime.setMinutes(parseInt(minutes, 10));
+                    alert('Alarme définie à ' + alarmValue);
+                } else {
+                    alert('Veuillez entrer une heure valide pour l\'alarme.');
+                }
+            });
+            stopAlarmButton.addEventListener('click', function() {
+                audioPlayer.pause();
+                audioPlayer.currentTime = 0; // Rembobiner le lecteur audio
+            });
+
+            setInterval(update, 500);
+        });
+    </script>
+</head>
+<body style="background-color: rgb(36, 35, 35);">
+    <div class="digital-clock" style="margin-top: 100px;">
+        <div class="week">
+            <div class="active">DIM</div>
+            <div>LUN</div>
+            <div>MAR</div>
+            <div>MER</div>
+            <div>JEU</div>
+            <div>VEN</div>
+            <div>SAM</div>
+        </div>
+        <div class="time">
+            <div class="hour">12</div>
+            <div class="dot">:</div>
+            <div class="min">05</div>
+        </div>
+    </div>
+    <div class="alarm-container">
+        <label for="alarmInput" style="color: #fff;">Définir une alarme : </label>
+        <input type="time" id="alarmInput">
+        <button id="setAlarmButton"><i class="fas fa-bell"></i></button>
+        <button id="stopAlarmButton"><i class="fas fa-stop"></i> Arrêter l'alarme</button>
+        <audio id="audioPlayer" src="Alarme1.mp3" preload="auto"></audio>
+    </div>
+</body>
+</html>
